@@ -1,23 +1,25 @@
 package model
 
 type OpenAPIResponse struct {
-	TotalCount    int            `json:"TotalCount"`
-	RequestID     string         `json:"RequestId"`
-	PageSize      int            `json:"PageSize"`
-	DomainRecords []DomainRecord `json:"DomainRecords"`
-	PageNumber    int            `json:"PageNumber"`
+	DomainRecords DomainRecords `json:"DomainRecords"`
+	PageNumber    int           `json:"PageNumber"`
+	PageSize      int           `json:"PageSize"`
+	RequestID     string        `json:"RequestId"`
+	TotalCount    int           `json:"TotalCount"`
 }
-
-type DomainRecord struct {
-	Rr         string `json:"RR"`
-	Line       string `json:"Line"`
-	Status     string `json:"Status"`
-	Locked     bool   `json:"Locked"`
-	Type       string `json:"Type"`
+type DomainRecords struct {
+	Record []Record `json:"Record"`
+}
+type Record struct {
 	DomainName string `json:"DomainName"`
-	Value      string `json:"Value"`
+	Line       string `json:"Line"`
+	Locked     bool   `json:"Locked"`
+	RR         string `json:"RR"`
 	RecordID   string `json:"RecordId"`
+	Status     string `json:"Status"`
 	TTL        int    `json:"TTL"`
+	Type       string `json:"Type"`
+	Value      string `json:"Value"`
 	Weight     int    `json:"Weight"`
 }
 

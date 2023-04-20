@@ -9,7 +9,7 @@ import (
 	"github.com/alibabacloud-go/tea/tea"
 )
 
-func GetDomainRecordsByRRKeyWord(key, domain string) ([]model.DomainRecord, error) {
+func GetDomainRecordsByRRKeyWord(key, domain string) (model.DomainRecords, error) {
 	describeDomainRecordsRequest := &alidns20150109.DescribeDomainRecordsRequest{
 		DomainName: tea.String(domain),
 		RRKeyWord:  tea.String(key),
@@ -17,34 +17,33 @@ func GetDomainRecordsByRRKeyWord(key, domain string) ([]model.DomainRecord, erro
 	runtime := &util.RuntimeOptions{}
 	resp, _err := utils.ApiClient.DescribeDomainRecordsWithOptions(describeDomainRecordsRequest, runtime)
 	if _err != nil {
-		return []model.DomainRecord{}, _err
+		return model.DomainRecords{}, _err
 	} else {
-		var openapiresp model.OpenAPIResponse
+		var OpenAPI model.OpenAPIResponse
 
-		err := json.Unmarshal([]byte(*util.ToJSONString(resp)), &openapiresp)
+		err := json.Unmarshal([]byte(*util.ToJSONString(resp.Body)), &OpenAPI)
 		if err != nil {
-			return []model.DomainRecord{}, err
+			return model.DomainRecords{}, err
 		} else {
-			return openapiresp.DomainRecords, nil
+			return OpenAPI.DomainRecords, nil
 		}
 	}
 
 }
 
-func GetDomainRecords(domain string) ([]model.DomainRecord, error) {
+func GetDomainRecords(domain string) (model.DomainRecords, error) {
 	describeDomainRecordsRequest := &alidns20150109.DescribeDomainRecordsRequest{
 		DomainName: tea.String(domain),
 	}
 	runtime := &util.RuntimeOptions{}
 	resp, _err := utils.ApiClient.DescribeDomainRecordsWithOptions(describeDomainRecordsRequest, runtime)
 	if _err != nil {
-		return []model.DomainRecord{}, _err
+		return model.DomainRecords{}, _err
 	} else {
 		var openapiresp model.OpenAPIResponse
-
-		err := json.Unmarshal([]byte(*util.ToJSONString(resp)), &openapiresp)
+		err := json.Unmarshal([]byte(*util.ToJSONString(resp.Body)), &openapiresp)
 		if err != nil {
-			return []model.DomainRecord{}, err
+			return model.DomainRecords{}, err
 		} else {
 			return openapiresp.DomainRecords, nil
 		}
@@ -65,7 +64,7 @@ func AddDomainRecord(domain, rr, tType, value string) (model.RecordResponse, err
 		return model.RecordResponse{}, _err
 	} else {
 		var r model.RecordResponse
-		err := json.Unmarshal([]byte(*util.ToJSONString(resp)), &r)
+		err := json.Unmarshal([]byte(*util.ToJSONString(resp.Body)), &r)
 		if err != nil {
 			return model.RecordResponse{}, _err
 		} else {
@@ -87,7 +86,7 @@ func UpdateDomainRecord(recordId, rr, tType, value string) (model.RecordResponse
 		return model.RecordResponse{}, _err
 	} else {
 		var r model.RecordResponse
-		err := json.Unmarshal([]byte(*util.ToJSONString(resp)), &r)
+		err := json.Unmarshal([]byte(*util.ToJSONString(resp.Body)), &r)
 		if err != nil {
 			return model.RecordResponse{}, _err
 		} else {
