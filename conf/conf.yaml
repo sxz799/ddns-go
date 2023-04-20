@@ -1,6 +1,10 @@
-
+#  ali Key
 key :
-  accessKeyId : LTAI5tJxTfajCPCa1jCH8FK3
-  accessKeySecret : j62NCRyLNLUqChQPs5agwuNva0Vjon
+  accessKeyId :
+  accessKeySecret :
+# 一级域名
 domain : sxz799.fun
+# 二级域名
 rr : test
+# 间隔时间(分钟)
+interval : 10

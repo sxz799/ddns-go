@@ -20,7 +20,6 @@ func GetDomainRecordsByRRKeyWord(key, domain string) (model.DomainRecords, error
 		return model.DomainRecords{}, _err
 	} else {
 		var OpenAPI model.OpenAPIResponse
-
 		err := json.Unmarshal([]byte(*util.ToJSONString(resp.Body)), &OpenAPI)
 		if err != nil {
 			return model.DomainRecords{}, err
@@ -40,12 +39,12 @@ func GetDomainRecords(domain string) (model.DomainRecords, error) {
 	if _err != nil {
 		return model.DomainRecords{}, _err
 	} else {
-		var openapiresp model.OpenAPIResponse
-		err := json.Unmarshal([]byte(*util.ToJSONString(resp.Body)), &openapiresp)
+		var OpenAPI model.OpenAPIResponse
+		err := json.Unmarshal([]byte(*util.ToJSONString(resp.Body)), &OpenAPI)
 		if err != nil {
 			return model.DomainRecords{}, err
 		} else {
-			return openapiresp.DomainRecords, nil
+			return OpenAPI.DomainRecords, nil
 		}
 	}
 
@@ -82,6 +81,24 @@ func UpdateDomainRecord(recordId, rr, tType, value string) (model.RecordResponse
 	}
 	runtime := &util.RuntimeOptions{}
 	resp, _err := utils.ApiClient.UpdateDomainRecordWithOptions(updateDomainRecordRequest, runtime)
+	if _err != nil {
+		return model.RecordResponse{}, _err
+	} else {
+		var r model.RecordResponse
+		err := json.Unmarshal([]byte(*util.ToJSONString(resp.Body)), &r)
+		if err != nil {
+			return model.RecordResponse{}, _err
+		} else {
+			return r, nil
+		}
+	}
+}
+func DelDomainRecord(recordId string) (model.RecordResponse, error) {
+	deleteDomainRecordRequest := &alidns20150109.DeleteDomainRecordRequest{
+		RecordId: tea.String(recordId),
+	}
+	runtime := &util.RuntimeOptions{}
+	resp, _err := utils.ApiClient.DeleteDomainRecordWithOptions(deleteDomainRecordRequest, runtime)
 	if _err != nil {
 		return model.RecordResponse{}, _err
 	} else {

@@ -14,9 +14,7 @@ func main() {
 		panic(err)
 	}
 	for _, r := range records.Record {
-		//service.UpdateDomainRecord(r.RecordID, rr, "A", "89.88.88.88")
-		fmt.Println(r.RecordID, r.RR, r.Value, r.Type)
+		fmt.Println(r)
 	}
-	//service.AddDomainRecord(domain, "test2", "A", "66.99.55.66")
 
 }
