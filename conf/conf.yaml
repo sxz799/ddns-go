@@ -8,3 +8,7 @@ domain : sxz799.fun
 rr : test
 # 间隔时间(分钟)
 interval : 10
+# 获取当前公网IP方式 1 查询本地网卡信息 2 互联网获取
+getlocalIPTyoe : 1
+# 本地网卡名称名称
+wanName : wan

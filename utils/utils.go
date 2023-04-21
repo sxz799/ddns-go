@@ -5,7 +5,6 @@ import (
 	openapi "github.com/alibabacloud-go/darabonba-openapi/v2/client"
 	"github.com/alibabacloud-go/tea/tea"
 	"github.com/spf13/viper"
-	"log"
 )
 
 var ApiClient *alidns20150109.Client
@@ -20,8 +19,6 @@ func init() {
 	}
 	accessKeyId := viper.GetString("key.accessKeyId")
 	accessKeySecret := viper.GetString("key.accessKeySecret")
-	log.Println(accessKeyId)
-	log.Println(accessKeySecret)
 	ApiClient, err = createClient(&accessKeyId, &accessKeySecret)
 	if err != nil {
 		panic(err)

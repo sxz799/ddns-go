@@ -1,113 +1,111 @@
 package service
 
 import (
-	"ddns-go/model"
-	"ddns-go/utils"
-	"encoding/json"
-	alidns20150109 "github.com/alibabacloud-go/alidns-20150109/v4/client"
-	util "github.com/alibabacloud-go/tea-utils/v2/service"
-	"github.com/alibabacloud-go/tea/tea"
+	"ddns-go/api"
+	"errors"
+	"fmt"
+	"github.com/spf13/viper"
+	"io/ioutil"
+	"net"
+	"net/http"
+	"strings"
 )
 
-func GetDomainRecordsByRRKeyWord(key, domain string) (model.DomainRecords, error) {
-	describeDomainRecordsRequest := &alidns20150109.DescribeDomainRecordsRequest{
-		DomainName: tea.String(domain),
-		RRKeyWord:  tea.String(key),
+func InitRecord() (string, error) {
+	domain := viper.GetString("domain")
+	rr := viper.GetString("rr")
+	records, err := api.GetDomainRecordsByRRKeyWord(rr, domain)
+	if err != nil {
+		panic(err)
 	}
-	runtime := &util.RuntimeOptions{}
-	resp, _err := utils.ApiClient.DescribeDomainRecordsWithOptions(describeDomainRecordsRequest, runtime)
-	if _err != nil {
-		return model.DomainRecords{}, _err
-	} else {
-		var OpenAPI model.OpenAPIResponse
-		err := json.Unmarshal([]byte(*util.ToJSONString(resp.Body)), &OpenAPI)
+	if len(records.Record) < 1 {
+		record, err := api.AddDomainRecord(domain, rr, "A", "1.1.1.1")
 		if err != nil {
-			return model.DomainRecords{}, err
+			return "", err
 		} else {
-			return OpenAPI.DomainRecords, nil
+			return record.RecordID, nil
 		}
-	}
-
-}
-
-func GetDomainRecords(domain string) (model.DomainRecords, error) {
-	describeDomainRecordsRequest := &alidns20150109.DescribeDomainRecordsRequest{
-		DomainName: tea.String(domain),
-	}
-	runtime := &util.RuntimeOptions{}
-	resp, _err := utils.ApiClient.DescribeDomainRecordsWithOptions(describeDomainRecordsRequest, runtime)
-	if _err != nil {
-		return model.DomainRecords{}, _err
 	} else {
-		var OpenAPI model.OpenAPIResponse
-		err := json.Unmarshal([]byte(*util.ToJSONString(resp.Body)), &OpenAPI)
-		if err != nil {
-			return model.DomainRecords{}, err
-		} else {
-			return OpenAPI.DomainRecords, nil
+		for _, r := range records.Record {
+			if r.RR == rr {
+				return r.RecordID, nil
+			}
 		}
-	}
-
-}
-
-func AddDomainRecord(domain, rr, tType, value string) (model.RecordResponse, error) {
-	addDomainRecordRequest := &alidns20150109.AddDomainRecordRequest{
-		DomainName: tea.String(domain),
-		RR:         tea.String(rr),
-		Type:       tea.String(tType),
-		Value:      tea.String(value),
-	}
-	runtime := &util.RuntimeOptions{}
-	resp, _err := utils.ApiClient.AddDomainRecordWithOptions(addDomainRecordRequest, runtime)
-	if _err != nil {
-		return model.RecordResponse{}, _err
-	} else {
-		var r model.RecordResponse
-		err := json.Unmarshal([]byte(*util.ToJSONString(resp.Body)), &r)
-		if err != nil {
-			return model.RecordResponse{}, _err
-		} else {
-			return r, nil
-		}
+		return "", errors.New("未在存在的解析记录中找到指定内容")
 	}
 }
-
-func UpdateDomainRecord(recordId, rr, tType, value string) (model.RecordResponse, error) {
-	updateDomainRecordRequest := &alidns20150109.UpdateDomainRecordRequest{
-		RecordId: tea.String(recordId),
-		RR:       tea.String(rr),
-		Type:     tea.String(tType),
-		Value:    tea.String(value),
-	}
-	runtime := &util.RuntimeOptions{}
-	resp, _err := utils.ApiClient.UpdateDomainRecordWithOptions(updateDomainRecordRequest, runtime)
-	if _err != nil {
-		return model.RecordResponse{}, _err
+func GetLocalIP() (string, error) {
+	if viper.GetString("getlocalIPTyoe") == "1" {
+		return GetLocalIPByInterface()
 	} else {
-		var r model.RecordResponse
-		err := json.Unmarshal([]byte(*util.ToJSONString(resp.Body)), &r)
-		if err != nil {
-			return model.RecordResponse{}, _err
-		} else {
-			return r, nil
-		}
+		return GetLocalIPByInternet()
 	}
 }
-func DelDomainRecord(recordId string) (model.RecordResponse, error) {
-	deleteDomainRecordRequest := &alidns20150109.DeleteDomainRecordRequest{
-		RecordId: tea.String(recordId),
+func GetLocalIPByInterface() (string, error) {
+	ifaces, err := net.Interfaces()
+	if err != nil {
+		return "", err
 	}
-	runtime := &util.RuntimeOptions{}
-	resp, _err := utils.ApiClient.DeleteDomainRecordWithOptions(deleteDomainRecordRequest, runtime)
-	if _err != nil {
-		return model.RecordResponse{}, _err
-	} else {
-		var r model.RecordResponse
-		err := json.Unmarshal([]byte(*util.ToJSONString(resp.Body)), &r)
-		if err != nil {
-			return model.RecordResponse{}, _err
-		} else {
-			return r, nil
+	for _, iface := range ifaces {
+		fmt.Println(iface.Name)
+		if strings.ToLower(iface.Name) == "wan" {
+			addrs, err := iface.Addrs()
+			if err != nil {
+				continue
+			}
+			for _, addr := range addrs {
+				if strings.Contains(addr.String(), "/") {
+					addrStr := addr.String()[:strings.Index(addr.String(), "/")]
+					if isPublicIP(net.ParseIP(addrStr)) {
+						return addr.String(), nil
+					}
+				}
+
+			}
 		}
 	}
+	return "", errors.New("未获取到公网IP")
+}
+func GetLocalIPByInternet() (string, error) {
+	resp, err := http.Get("https://api.ipify.org")
+	if err != nil {
+		return "", err
+	}
+	defer resp.Body.Close()
+	ip, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		fmt.Println("Error:", err)
+		return "", err
+	}
+	return string(ip), nil
+}
+
+func isPublicIP(ip net.IP) bool {
+	if ip.IsLoopback() || ip.IsLinkLocalMulticast() || ip.IsLinkLocalUnicast() {
+		return false
+	}
+	if ipv4 := ip.To4(); ipv4 != nil {
+		// 10.0.0.0/8
+		if ipv4[0] == 10 {
+			return false
+		}
+		// 172.16.0.0/12
+		if ipv4[0] == 172 && ipv4[1] >= 16 && ipv4[1] <= 31 {
+			return false
+		}
+		// 192.168.0.0/16
+		if ipv4[0] == 192 && ipv4[1] == 168 {
+			return false
+		}
+	}
+	// 169.254.0.0/16
+	if ip[0] == 169 && ip[1] == 254 {
+		return false
+	}
+	// 240.0.0.0/4
+	if ip[0] >= 240 {
+		return false
+	}
+	// Otherwise, it's a public IP
+	return true
 }
