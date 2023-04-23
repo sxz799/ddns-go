@@ -5,9 +5,13 @@ import (
 	openapi "github.com/alibabacloud-go/darabonba-openapi/v2/client"
 	"github.com/alibabacloud-go/tea/tea"
 	"github.com/spf13/viper"
+	"github.com/tencentcloud/tencentcloud-sdk-go/tencentcloud/common"
+	"github.com/tencentcloud/tencentcloud-sdk-go/tencentcloud/common/profile"
+	dnspod "github.com/tencentcloud/tencentcloud-sdk-go/tencentcloud/dnspod/v20210323"
 )
 
-var ApiClient *alidns20150109.Client
+var AliApiClient *alidns20150109.Client
+var TencentClient *dnspod.Client
 
 func init() {
 	viper.SetConfigName("conf")
@@ -19,13 +23,19 @@ func init() {
 	}
 	accessKeyId := viper.GetString("key.accessKeyId")
 	accessKeySecret := viper.GetString("key.accessKeySecret")
-	ApiClient, err = createClient(&accessKeyId, &accessKeySecret)
+	server := viper.GetString("server")
+	switch server {
+	case "aliModel":
+		AliApiClient, err = createAliClient(&accessKeyId, &accessKeySecret)
+	case "tencent":
+		TencentClient, err = createTencentClient(accessKeyId, accessKeySecret)
+	}
 	if err != nil {
 		panic(err)
 	}
 }
 
-func createClient(accessKeyId *string, accessKeySecret *string) (_result *alidns20150109.Client, _err error) {
+func createAliClient(accessKeyId *string, accessKeySecret *string) (_result *alidns20150109.Client, _err error) {
 	config := &openapi.Config{
 		// 必填，您的 AccessKey ID
 		AccessKeyId: accessKeyId,
@@ -37,4 +47,15 @@ func createClient(accessKeyId *string, accessKeySecret *string) (_result *alidns
 	_result = &alidns20150109.Client{}
 	_result, _err = alidns20150109.NewClient(config)
 	return _result, _err
+}
+
+func createTencentClient(accessKeyId string, accessKeySecret string) (*dnspod.Client, error) {
+	credential := common.NewCredential(
+		accessKeyId,
+		accessKeySecret,
+	)
+	cpf := profile.NewClientProfile()
+	cpf.HttpProfile.Endpoint = "dnspod.tencentcloudapi.com"
+	client, err := dnspod.NewClient(credential, "", cpf)
+	return client, err
 }

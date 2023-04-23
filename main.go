@@ -1,7 +1,8 @@
 package main
 
 import (
-	"ddns-go/api"
+	"ddns-go/api/aliApi"
+	"ddns-go/api/tencentApi"
 	"ddns-go/service"
 	"fmt"
 	"github.com/spf13/viper"
@@ -10,8 +11,11 @@ import (
 
 func main() {
 	var lastLocalIP string
+	server := viper.GetString("server")
+	domain := viper.GetString("domain")
+	recordId, recordId2, err := service.InitRecord()
 	for {
-		recordId, err := service.InitRecord()
+
 		if err != nil {
 			fmt.Println("获取解析记录失败！错误信息：", err)
 			time.Sleep(time.Minute * time.Duration(viper.GetInt("interval")))
@@ -24,7 +28,15 @@ func main() {
 			continue
 		}
 		if lastLocalIP == "" || lastLocalIP != localIP {
-			_, err = api.UpdateDomainRecord(recordId, viper.GetString("rr"), "A", localIP)
+
+			switch server {
+			case "aliModel":
+				_, err = aliApi.UpdateDomainRecord(recordId, viper.GetString("rr"), "A", localIP)
+			case "tencent":
+				tencentApi.UpdateDomainRecord(domain, "A", "默认", localIP, recordId2)
+
+			}
+
 			if err != nil {
 				fmt.Println("获取本机IP失败！错误信息：", err)
 				time.Sleep(time.Minute * time.Duration(viper.GetInt("interval")))

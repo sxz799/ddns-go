@@ -1,7 +1,7 @@
 package service
 
 import (
-	"ddns-go/api"
+	"ddns-go/api/aliApi"
 	"errors"
 	"fmt"
 	"github.com/spf13/viper"
@@ -11,28 +11,36 @@ import (
 	"strings"
 )
 
-func InitRecord() (string, error) {
+func InitRecord() (string, uint64, error) {
 	domain := viper.GetString("domain")
 	rr := viper.GetString("rr")
-	records, err := api.GetDomainRecordsByRRKeyWord(rr, domain)
-	if err != nil {
-		panic(err)
-	}
-	if len(records.Record) < 1 {
-		record, err := api.AddDomainRecord(domain, rr, "A", "1.1.1.1")
+	server := viper.GetString("server")
+	switch server {
+	case "aliModel":
+		records, err := aliApi.GetDomainRecordsByRRKeyWord(rr, domain)
 		if err != nil {
-			return "", err
-		} else {
-			return record.RecordID, nil
+			panic(err)
 		}
-	} else {
-		for _, r := range records.Record {
-			if r.RR == rr {
-				return r.RecordID, nil
+		if len(records.Record) < 1 {
+			record, err := aliApi.AddDomainRecord(domain, rr, "A", "1.1.1.1")
+			if err != nil {
+				return "", 0, err
+			} else {
+				return record.RecordID, 0, nil
 			}
+		} else {
+			for _, r := range records.Record {
+				if r.RR == rr {
+					return r.RecordID, 0, nil
+				}
+			}
+			return "", 0, errors.New("未在存在的解析记录中找到指定内容")
 		}
-		return "", errors.New("未在存在的解析记录中找到指定内容")
+	case "tencent":
+		return "", 0, nil
 	}
+	return "", 0, nil
+
 }
 func GetLocalIP() (string, error) {
 	if viper.GetString("getlocalIPTyoe") == "1" {

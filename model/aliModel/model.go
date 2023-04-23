@@ -1,6 +1,6 @@
-package model
+package aliModel
 
-type OpenAPIResponse struct {
+type AliAPIResponse struct {
 	DomainRecords DomainRecords `json:"DomainRecords"`
 	PageNumber    int           `json:"PageNumber"`
 	PageSize      int           `json:"PageSize"`

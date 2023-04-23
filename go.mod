@@ -8,6 +8,8 @@ require (
 	github.com/alibabacloud-go/tea v1.1.20
 	github.com/alibabacloud-go/tea-utils/v2 v2.0.1
 	github.com/spf13/viper v1.15.0
+	github.com/tencentcloud/tencentcloud-sdk-go/tencentcloud/common v1.0.644
+	github.com/tencentcloud/tencentcloud-sdk-go/tencentcloud/dnspod v1.0.644
 )
 
 require (

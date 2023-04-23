@@ -1,4 +1,6 @@
-#  ali Key
+#  aliModel Key
+server : aliModel  # aliModel or tencent
+
 key :
   accessKeyId :
   accessKeySecret :
