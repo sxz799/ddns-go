@@ -8,6 +8,8 @@ import (
 	"github.com/tencentcloud/tencentcloud-sdk-go/tencentcloud/common"
 	"github.com/tencentcloud/tencentcloud-sdk-go/tencentcloud/common/profile"
 	dnspod "github.com/tencentcloud/tencentcloud-sdk-go/tencentcloud/dnspod/v20210323"
+	"log"
+	"os"
 )
 
 var AliApiClient *alidns20150109.Client
@@ -23,6 +25,10 @@ func init() {
 	}
 	accessKeyId := viper.GetString("key.accessKeyId")
 	accessKeySecret := viper.GetString("key.accessKeySecret")
+	if accessKeyId == "" || accessKeySecret == "" {
+		log.Println("请填写密钥信息！")
+		os.Exit(0)
+	}
 	server := viper.GetString("server")
 	switch server {
 	case "aliModel":
