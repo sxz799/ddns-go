@@ -1,7 +1,8 @@
 package main
 
 import (
-	"ddns-go/service"
+	"ddns-go/ddns"
+	"ddns-go/utils"
 	"fmt"
 	"github.com/spf13/viper"
 	"time"
@@ -11,13 +12,13 @@ func main() {
 	var lastLocalIP string
 
 	for {
-		localIP, err := service.GetLocalIP()
+		localIP, err := utils.GetLocalIP()
 		if err != nil {
 			fmt.Println("获取本机IP失败！错误信息：", err)
 			time.Sleep(time.Minute * time.Duration(viper.GetInt("interval")))
 			continue
 		}
-		err = service.InitRecord(localIP)
+		err = ddns.InitRecord(localIP)
 		if err != nil {
 			fmt.Println("获取解析记录失败！错误信息：", err)
 			time.Sleep(time.Minute * time.Duration(viper.GetInt("interval")))
@@ -25,7 +26,7 @@ func main() {
 		}
 
 		if lastLocalIP == "" || lastLocalIP != localIP {
-			err = service.UpdateDomainRecord(localIP)
+			err = ddns.UpdateDomainRecord(localIP)
 			if err != nil {
 				fmt.Println("更新解析记录失败！错误信息：", err)
 				time.Sleep(time.Minute * time.Duration(viper.GetInt("interval")))
