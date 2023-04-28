@@ -22,9 +22,11 @@ var AliApiClient *alidns20150109.Client
 var TencentClient *dnspod.Client
 
 func init() {
-	viper.SetConfigName("conf")
-	viper.SetConfigType("yaml")
-	viper.AddConfigPath("conf")
+	if _, err := os.Stat("conf/conf.yaml"); os.IsNotExist(err) {
+		viper.SetConfigFile("conf.yaml")
+	} else {
+		viper.SetConfigFile("conf/conf.yaml")
+	}
 	err := viper.ReadInConfig()
 	if err != nil {
 		panic("viper load fail ...")
@@ -37,7 +39,7 @@ func init() {
 	}
 	server := viper.GetString("server")
 	switch server {
-	case "aliModel":
+	case "ali":
 		AliApiClient, err = createAliClient(&accessKeyId, &accessKeySecret)
 	case "tencent":
 		TencentClient, err = createTencentClient(accessKeyId, accessKeySecret)

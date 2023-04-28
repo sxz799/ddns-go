@@ -5,12 +5,13 @@ import (
 	"ddns-go/utils"
 	"fmt"
 	"github.com/spf13/viper"
+	"log"
 	"time"
 )
 
 func main() {
 	var lastLocalIP string
-
+	log.Println("启动成功！")
 	for {
 		localIP, err := utils.GetLocalIP()
 		if err != nil {
