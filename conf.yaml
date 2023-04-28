@@ -5,11 +5,11 @@ key : # *必填
   accessKeyId :
   accessKeySecret :
 # 一级域名 *必填
-domain : sxz799.top
+domain : sxz799.fun
 # 二级域名 *必填
-subDomain : test
+subDomain : e
 # 间隔时间(分钟)
-interval : 10
+interval : 1
 # 获取当前公网IP方式 1 查询本地网卡信息 2 互联网获取
 getPublicIPType : 2
 # 本地网卡名称名称

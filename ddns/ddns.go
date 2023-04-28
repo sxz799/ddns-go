@@ -10,9 +10,9 @@ var domain, subDomain, server string
 var aliRecord string
 var tencentRecord uint64
 
-func InitRecord(value string) error {
+func InitRecord(value string) (string, error) {
 	if aliRecord != "" || tencentRecord > 0 {
-		return nil
+		return "", nil
 	}
 	domain = viper.GetString("domain")
 	subDomain = viper.GetString("subDomain")
@@ -21,37 +21,37 @@ func InitRecord(value string) error {
 	case "ali":
 		records, err := aliApi.GetDomainRecordsByRRKeyWord(subDomain, domain)
 		if err != nil {
-			return err
+			return "", err
 		}
 		for _, r := range records {
 			if r.RR == subDomain {
 				aliRecord = r.RecordID
-				return nil
+				return r.Value, nil
 			}
 		}
 		aliRecord, err = aliApi.AddDomainRecord(domain, subDomain, "A", value)
 		if err != nil {
-			return err
+			return "", err
 		} else {
-			return nil
+			return value, nil
 		}
 
 	case "tencent":
 		records, err := tencentApi.ListDomainRecords(domain)
 		if err != nil {
-			return err
+			return "", err
 		}
 		for _, r := range records {
 			if *r.Name == subDomain {
 				tencentRecord = *r.RecordId
-				return nil
+				return *r.Value, nil
 			}
 		}
 		tencentRecord, err = tencentApi.AddDomainRecord(domain, subDomain, "A", "默认", value)
 		if err != nil {
-			return err
+			return "", err
 		} else {
-			return nil
+			return value, nil
 		}
 
 	}
