@@ -30,4 +30,4 @@ jobs:
     # Artifact name
         name: my-artifact
     # Destination path
-        path: /
+        path: ${{ github.workspace }}/main
