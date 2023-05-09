@@ -22,7 +22,7 @@ jobs:
         go-version: 1.19
 
     - name: Build
-      run: go build -v ./...
+      run: go build -v -o bin/ddns-go .
     - name: Build
       run: ls
     - name: Upload a Build Artifact
@@ -32,4 +32,4 @@ jobs:
     # Artifact name
         name: my-artifact
     # Destination path
-        path: ${{ github.workspace }}
+        path: ${{ github.workspace }}/bin
