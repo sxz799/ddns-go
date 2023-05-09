@@ -27,7 +27,7 @@ jobs:
     - name: Test
       run: go test -v ./...
     - name: upload result
-      uses: actions/upload-artifact@v1
+      uses: actions/upload-artifact@v2
       with:
         name: my-artifact
-        path: ${{ github.workspace }}/artifact
+        path: ${{ github.workspace }}/
