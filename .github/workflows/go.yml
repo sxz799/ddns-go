@@ -23,11 +23,13 @@ jobs:
 
     - name: Build
       run: go build -v ./...
-
+    - name: Build
+      run: ls
     - name: Upload a Build Artifact
       uses: actions/upload-artifact@v3.1.2
+      
       with:
     # Artifact name
         name: my-artifact
     # Destination path
-        path: ${{ github.workspace }}/main
+        path: ${{ github.workspace }}
