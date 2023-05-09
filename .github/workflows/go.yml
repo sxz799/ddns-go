@@ -24,10 +24,10 @@ jobs:
     - name: Build
       run: go build -v ./...
 
-    - name: Test
-      run: go test -v ./...
-    - name: upload result
-      uses: actions/upload-artifact@v2
+    - name: Download a Build Artifact
+      uses: actions/download-artifact@v2.1.1
       with:
+    # Artifact name
         name: my-artifact
-        path: ${{ github.workspace }}/
+    # Destination path
+        path: /
